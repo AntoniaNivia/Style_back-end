@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Enums
+enum UserType {
+  USER
+  STORE
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+}
+
+enum MannequinPreference {
+  Woman
+  Man
+  Neutral
+}
+
+// Models
+model User {
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  name                String
+  password            String
+  type                UserType            @default(USER)
+  gender              Gender              @default(OTHER)
+  mannequinPreference MannequinPreference @default(Neutral)
+  style               String?
+  avatarUrl           String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Relations
+  clothingItems ClothingItem[]
+  savedOutfits  SavedOutfit[]
+  feedPosts     FeedPost[]
+  likedPosts    LikedPost[]
+
+  @@map("users")
+}
+
+model ClothingItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photoUrl  String
+  type      String
+  color     String
+  season    String
+  occasion  String
+  tags      String[]
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("clothing_items")
+}
+
+model FeedPost {
+  id        String      @id @default(cuid())
+  storeId   String
+  store     User        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  caption   String
+  createdAt DateTime    @default(now())
+  likes     LikedPost[]
+
+  @@index([storeId])
+  @@map("feed_posts")
+}
+
+model LikedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@map("liked_posts")
+}
+
+model SavedOutfit {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  reasoning String
+  itemsJson String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("saved_outfits")
+}

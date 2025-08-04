@@ -1,0 +1,13 @@
+# Prisma Migrations
+
+This directory contains the Prisma migration files.
+
+Run migrations with:
+```bash
+npm run db:migrate
+```
+
+For production deployments:
+```bash
+npm run db:deploy
+```
