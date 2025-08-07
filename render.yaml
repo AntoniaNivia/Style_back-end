@@ -1,3 +1,4 @@
+# StyleWise Backend - Render.com Deployment Configuration
 services:
   - type: web
     name: stylewise-backend
