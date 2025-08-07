@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { supabaseService } from './supabase.service';
-import { analyzeClothing } from '@/ai/flows/analyze-clothing.flow';
+import { analyzeClothingFlow } from '@/ai/flows/analyze-clothing.flow';
 import { generateOutfit } from '@/ai/flows/generate-outfit.flow';
 import { NotFoundError, ValidationError } from '@/utils/AppError';
-import { AddClothingItemInput, GetWardrobeInput } from '@/validations/wardrobe.validation';
+import { AddClothingItemInput, GetWardrobeInput, AnalyzeClothingInput } from '@/validations/wardrobe.validation';
 import { GenerateOutfitInput } from '@/validations/builder.validation';
+import { runFlow } from '@genkit-ai/flow';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +25,10 @@ export class WardrobeService {
       const imageType = base64Match[1];
 
       // Analyze clothing with AI
-      const analysis = await analyzeClothing(imageBase64, imageType);
+      const analysis = await runFlow(analyzeClothingFlow, {
+        imageBase64,
+        imageType,
+      });
 
       // Upload image to Supabase
       const photoUrl = await supabaseService.uploadImage(buffer, 'clothing', contentType);
@@ -204,6 +208,43 @@ export class WardrobeService {
         hasPrev: page > 1,
       },
     };
+  }
+
+  async analyzeClothingOnly(data: AnalyzeClothingInput) {
+    try {
+      let imageBase64: string;
+      let imageType: string;
+
+      // Suporte para ambos os formatos (compatibilidade)
+      if (data.photoDataUri) {
+        // Formato antigo: extrair base64 do data URI
+        const base64Match = data.photoDataUri.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (!base64Match) {
+          throw new ValidationError('Formato de imagem inválido');
+        }
+        imageBase64 = base64Match[2];
+        imageType = base64Match[1];
+      } else if (data.imageBase64 && data.imageType) {
+        // Formato novo: usar diretamente
+        imageBase64 = data.imageBase64;
+        imageType = data.imageType;
+      } else {
+        throw new ValidationError('Dados de imagem não fornecidos corretamente');
+      }
+
+      // Analyze clothing with AI (without saving)
+      const analysis = await runFlow(analyzeClothingFlow, {
+        imageBase64,
+        imageType,
+        name: data.name,
+        description: data.description,
+      });
+
+      return analysis;
+    } catch (error) {
+      console.error('Erro ao analisar imagem:', error);
+      throw error;
+    }
   }
 }
 

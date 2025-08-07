@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { feedService } from '@/services/feed.service';
-import { createFeedPostSchema, getFeedSchema } from '@/validations/feed.validation';
+import { 
+  createFeedPostSchema, 
+  getFeedSchema, 
+  getSavedPostsSchema, 
+  postIdSchema 
+} from '@/validations/feed.validation';
 import { ValidationError } from '@/utils/AppError';
 
 export class FeedController {
@@ -55,8 +60,12 @@ export class FeedController {
         throw new ValidationError('Usuário não autenticado');
       }
 
-      const { id } = req.params;
-      const result = await feedService.likePost(req.user.id, id);
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.likePost(req.user.id, validation.data.params.postId);
 
       res.json({
         success: true,
@@ -73,8 +82,12 @@ export class FeedController {
         throw new ValidationError('Usuário não autenticado');
       }
 
-      const { id } = req.params;
-      const result = await feedService.unlikePost(req.user.id, id);
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.unlikePost(req.user.id, validation.data.params.postId);
 
       res.json({
         success: true,
@@ -85,14 +98,87 @@ export class FeedController {
     }
   }
 
-  async deleteFeedPost(req: Request, res: Response, next: NextFunction) {
+  // 🆕 NOVOS ENDPOINTS PARA POSTS SALVOS
+
+  async savePost(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
         throw new ValidationError('Usuário não autenticado');
       }
 
-      const { id } = req.params;
-      const result = await feedService.deleteFeedPost(req.user.id, id);
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.savePost(validation.data.params.postId, req.user.id);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async unsavePost(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new ValidationError('Usuário não autenticado');
+      }
+
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.unsavePost(validation.data.params.postId, req.user.id);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSavedPosts(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new ValidationError('Usuário não autenticado');
+      }
+
+      const validation = getSavedPostsSchema.safeParse({ query: req.query });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.getSavedPosts(req.user.id, validation.data.query);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Endpoint atualizado para deletar posts
+  async deletePost(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new ValidationError('Usuário não autenticado');
+      }
+
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.deletePost(validation.data.params.postId, req.user.id);
 
       res.json({
         success: true,
@@ -105,8 +191,12 @@ export class FeedController {
 
   async getPostById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      const result = await feedService.getPostById(id, req.user?.id);
+      const validation = postIdSchema.safeParse({ params: req.params });
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await feedService.getPostById(validation.data.params.postId, req.user?.id);
 
       res.json({
         success: true,
@@ -127,6 +217,24 @@ export class FeedController {
       const limit = parseInt(req.query.limit as string) || 20;
 
       const result = await feedService.getStorePosts(req.user.id, page, limit);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Estatísticas do feed para o perfil
+  async getFeedStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new ValidationError('Usuário não autenticado');
+      }
+
+      const result = await feedService.getFeedStats(req.user.id);
 
       res.json({
         success: true,

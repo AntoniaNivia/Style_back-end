@@ -34,12 +34,15 @@ declare global {
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
+    console.log('Auth middleware - Token received:', token ? 'Yes' : 'No');
 
     if (!token) {
+      console.log('Auth middleware - No token provided');
       throw new UnauthorizedError('Token de acesso não fornecido');
     }
 
     const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    console.log('Auth middleware - Token decoded for user:', decoded.userId);
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -58,12 +61,19 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     });
 
     if (!user) {
+      console.log('Auth middleware - User not found:', decoded.userId);
       throw new NotFoundError('Usuário não encontrado');
     }
 
-    req.user = user;
+    req.user = {
+      ...user,
+      style: user.style ?? undefined,
+      avatarUrl: user.avatarUrl ?? undefined,
+    };
+    console.log('Auth middleware - User set:', req.user.id);
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     if (error instanceof jwt.JsonWebTokenError) {
       next(new UnauthorizedError('Token inválido'));
     } else {

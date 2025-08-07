@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { config } from '@/config';
 import { ConflictError, UnauthorizedError, ValidationError } from '@/utils/AppError';
@@ -98,6 +98,8 @@ export class AuthService {
             clothingItems: true,
             savedOutfits: true,
             feedPosts: true,
+            savedPosts: true, // 🆕 Posts salvos do feed
+            likedPosts: true, // 🆕 Posts curtidos
           },
         },
       },
@@ -114,7 +116,7 @@ export class AuthService {
     return jwt.sign(
       { userId, email, type },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
+      { expiresIn: '7d' }
     );
   }
 }

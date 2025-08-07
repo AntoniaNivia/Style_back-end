@@ -29,6 +29,13 @@ enum MannequinPreference {
   Neutral
 }
 
+enum GenerationStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
 // Models
 model User {
   id                  String              @id @default(cuid())
@@ -40,6 +47,8 @@ model User {
   mannequinPreference MannequinPreference @default(Neutral)
   style               String?
   avatarUrl           String?
+  bio                 String?             // 🆕 Biografia do usuário
+  location            String?             // 🆕 Localização do usuário
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 
@@ -48,7 +57,17 @@ model User {
   savedOutfits  SavedOutfit[]
   feedPosts     FeedPost[]
   likedPosts    LikedPost[]
+  savedPosts    SavedPost[] // ← Nova relação com posts salvos
+  
+  // 🆕 Novas relações
+  userOutfits          UserOutfit[]          // Outfits criados pelo usuário
+  likes                Like[]                // Likes dados pelo usuário
+  favorites            Favorite[]            // Favoritos do usuário
+  generatedOutfits     GeneratedOutfit[]     // 🆕 Looks gerados pela IA
+  manualOutfits        ManualOutfit[]        // 🆕 Looks manuais criados pelo usuário
+  mannequinGenerations MannequinGeneration[] // 🆕 Gerações de manequim
 
+  @@index([avatarUrl])
   @@map("users")
 }
 
@@ -64,20 +83,29 @@ model ClothingItem {
   tags      String[]
   createdAt DateTime @default(now())
 
+  // Relations
+  outfitItems OutfitItem[] // 🆕 Relação com outfit items
+
   @@index([userId])
   @@map("clothing_items")
 }
 
 model FeedPost {
-  id        String      @id @default(cuid())
-  storeId   String
-  store     User        @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  imageUrl  String
-  caption   String
-  createdAt DateTime    @default(now())
-  likes     LikedPost[]
+  id         String      @id @default(cuid())
+  storeId    String
+  store      User        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  caption    String
+  likesCount Int         @default(0)  // ← Contador de likes adicionado
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt   // ← Campo updatedAt adicionado
+  
+  // Relations
+  likes      LikedPost[]
+  savedPosts SavedPost[] // ← Nova relação com posts salvos
 
   @@index([storeId])
+  @@index([createdAt(sort: Desc)]) // ← Index para ordenação por data
   @@map("feed_posts")
 }
 
@@ -90,7 +118,25 @@ model LikedPost {
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
   @@map("liked_posts")
+}
+
+// 🆕 Modelo para Posts Salvos (Favoritos)
+model SavedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@index([createdAt(sort: Desc)])
+  @@map("saved_posts")
 }
 
 model SavedOutfit {
@@ -104,4 +150,152 @@ model SavedOutfit {
 
   @@index([userId])
   @@map("saved_outfits")
+}
+
+// 🆕 NOVOS MODELS PARA SISTEMA DE PERFIL DINÂMICO
+
+model UserOutfit {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  imageUrl      String?
+  tags          String[]      @default([])
+  isAiGenerated Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  outfitItems   OutfitItem[]  // Peças do outfit
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@index([isAiGenerated])
+  @@map("user_outfits")
+}
+
+model OutfitItem {
+  id              String       @id @default(cuid())
+  outfitId        String
+  outfit          UserOutfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  clothingItemId  String
+  clothingItem    ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
+  reason          String?      // Motivo da escolha da peça
+  createdAt       DateTime     @default(now())
+
+  @@unique([outfitId, clothingItemId])
+  @@index([outfitId])
+  @@index([clothingItemId])
+  @@map("outfit_items")
+}
+
+enum TargetType {
+  OUTFIT
+  POST
+}
+
+model Like {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetId   String     // ID do outfit ou post
+  targetType TargetType
+  createdAt  DateTime   @default(now())
+
+  @@unique([userId, targetId, targetType])
+  @@index([userId])
+  @@index([targetId, targetType])
+  @@index([createdAt(sort: Desc)])
+  @@map("likes")
+}
+
+model Favorite {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetId   String
+  targetType TargetType
+  createdAt  DateTime   @default(now())
+
+  @@unique([userId, targetId, targetType])
+  @@index([userId])
+  @@index([targetId, targetType])
+  @@index([createdAt(sort: Desc)])
+  @@map("favorites")
+}
+
+// 🆕 MODEL PARA LOOKS GERADOS PELA IA
+model GeneratedOutfit {
+  id                   String   @id @default(cuid())
+  userId               String
+  selectedItemsJson    String   // JSON array dos itens selecionados
+  reasoning            String   @db.Text
+  styleNotes           String   @db.Text
+  mannequinImageUrl    String?
+  confidence           Float?
+  inputPreferencesJson String   // JSON das preferências de entrada (weather, occasion, style, mannequin)
+  createdAt            DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("generated_outfits")
+}
+
+// 🆕 MODEL PARA LOOKS MANUAIS CRIADOS PELO USUÁRIO
+model ManualOutfit {
+  id                   String   @id @default(cuid())
+  userId               String
+  name                 String?  // Nome opcional para o look
+  selectedItemsJson    String   // JSON array dos itens selecionados manualmente
+  notes                String?  @db.Text // Notas opcionais do usuário
+  tags                 String[] // Tags para categorização
+  isPrivate            Boolean  @default(false) // Se o look é privado ou público
+  mannequinPreference  MannequinPreference @default(Neutral) // 🆕 Preferência de manequim
+  mannequinImageUrl    String? // 🆕 URL da imagem gerada do manequim
+  previewId            String? @unique // 🆕 ID único do preview gerado
+  generationMetadata   String? @db.Text // 🆕 Metadados da geração em JSON
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mannequinGenerations MannequinGeneration[] // 🆕 Gerações de manequim
+
+  // Indexes
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@index([isPrivate])
+  @@index([previewId])
+  @@map("manual_outfits")
+}
+
+// 🆕 MODEL PARA GERAÇÕES DE IMAGENS DE MANEQUIM
+model MannequinGeneration {
+  id                String   @id @default(cuid())
+  userId            String
+  outfitId          String?
+  previewId         String   @unique
+  status            GenerationStatus @default(PENDING)
+  imageUrl          String?
+  generationPrompt  String   @db.Text
+  aiService         String?  // midjourney, dalle, stable-diffusion
+  generationTime    Int?     // tempo em segundos
+  errorMessage      String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfit ManualOutfit? @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([previewId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("mannequin_generations")
 }

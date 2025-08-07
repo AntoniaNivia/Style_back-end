@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { authController } from '@/controllers/auth.controller';
-import { authMiddleware } from '@/middlewares/auth.middleware';
 import { profileController } from '../controllers/profile.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
 import { validateRequest } from '../middlewares/validation.middleware';
 import {
   updateProfileSchema,
@@ -14,26 +13,23 @@ import {
 
 const router = Router();
 
-// Apply auth middleware to all routes
+// Aplicar middleware de autenticação em todas as rotas
 router.use(authMiddleware);
 
-// User routes (protected)
-router.get('/me', authController.getMe.bind(authController));
-
-// Profile management routes
+// Rotas de perfil
 router.get('/profile', profileController.getProfile);
 router.put('/profile', validateRequest(updateProfileSchema), profileController.updateProfile);
 router.post('/avatar', validateRequest(uploadAvatarSchema), profileController.uploadAvatar);
 router.get('/profile/stats', profileController.getStats);
 
-// User outfits routes
+// Rotas de outfits
 router.get('/outfits', validateRequest(getOutfitsSchema), profileController.getOutfits);
 router.post('/outfits', validateRequest(createOutfitSchema), profileController.createOutfit);
 router.delete('/outfits/:id', profileController.deleteOutfit);
 
-// Social interaction routes
+// Rotas de interação social
 router.post('/like', validateRequest(likeOrFavoriteSchema), profileController.toggleLike);
 router.post('/favorite', validateRequest(likeOrFavoriteSchema), profileController.toggleFavorite);
 router.get('/favorites', validateRequest(getFavoritesSchema), profileController.getFavorites);
 
-export { router as userRoutes };
+export default router;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { wardrobeService } from '@/services/wardrobe.service';
-import { addClothingItemSchema, getWardrobeSchema } from '@/validations/wardrobe.validation';
+import { addClothingItemSchema, getWardrobeSchema, analyzeClothingSchema } from '@/validations/wardrobe.validation';
 import { generateOutfitSchema } from '@/validations/builder.validation';
 import { ValidationError } from '@/utils/AppError';
 
@@ -110,6 +110,31 @@ export class WardrobeController {
 
       res.json({
         success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async analyzeClothing(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new ValidationError('Usuário não autenticado');
+      }
+
+      // Validate request
+      const validation = analyzeClothingSchema.safeParse({ body: req.body });
+      
+      if (!validation.success) {
+        throw new ValidationError(validation.error.errors[0].message);
+      }
+
+      const result = await wardrobeService.analyzeClothingOnly(validation.data.body);
+
+      res.json({
+        success: true,
+        message: 'Análise de roupa concluída',
         data: result,
       });
     } catch (error) {

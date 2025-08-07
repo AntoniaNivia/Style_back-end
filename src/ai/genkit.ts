@@ -2,7 +2,7 @@ import { configureGenkit } from '@genkit-ai/core';
 import { googleAI } from '@genkit-ai/googleai';
 import { config } from '@/config';
 
-export const ai = configureGenkit({
+const ai: any = configureGenkit({
   plugins: [
     googleAI({
       apiKey: config.googleAI.apiKey,
@@ -12,4 +12,4 @@ export const ai = configureGenkit({
   enableTracingAndMetrics: true,
 });
 
-export { ai as genkit };
+export { ai, ai as genkit };

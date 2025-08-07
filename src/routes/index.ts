@@ -4,6 +4,8 @@ import { userRoutes } from './user.routes';
 import { wardrobeRoutes } from './wardrobe.routes';
 import { builderRoutes } from './builder.routes';
 import { feedRoutes } from './feed.routes';
+import manualOutfitRoutes from './manual-outfit.routes';
+import mannequinRoutes from './mannequin.routes';
 
 const router = Router();
 
@@ -19,9 +21,11 @@ router.get('/health', (req, res) => {
 
 // API routes
 router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
-router.use('/wardrobe', wardrobeRoutes);
+router.use('/users', userRoutes); // Agora inclui todas as rotas de perfil
+router.use('/wardrobe', wardrobeRoutes); // 🆕 Inclui busca avançada
 router.use('/builder', builderRoutes);
 router.use('/feed', feedRoutes);
+router.use('/manual-outfits', manualOutfitRoutes); // 🆕 Rotas para looks manuais
+router.use('/mannequin-preview', mannequinRoutes); // 🆕 Rotas para geração de manequim
 
 export { router as apiRoutes };

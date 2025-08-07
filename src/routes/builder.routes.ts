@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { wardrobeController } from '@/controllers/wardrobe.controller';
+import { builderController } from '@/controllers/builder.controller';
 import { authMiddleware } from '@/middlewares/auth.middleware';
 
 const router = Router();
@@ -8,6 +8,8 @@ const router = Router();
 router.use(authMiddleware);
 
 // Builder routes
-router.post('/generate', wardrobeController.generateOutfit.bind(wardrobeController));
+router.post('/generate', builderController.generateOutfit.bind(builderController));
+router.get('/outfits', builderController.getGeneratedOutfits.bind(builderController));
+router.get('/outfits/:outfitId', builderController.getOutfitById.bind(builderController));
 
 export { router as builderRoutes };

@@ -1,6 +1,6 @@
 import { defineFlow, runFlow } from '@genkit-ai/flow';
 import { generate } from '@genkit-ai/ai';
-import { googleAI } from '@genkit-ai/googleai';
+import { gemini15Flash } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 export const generateOutfitInputSchema = z.object({
@@ -111,7 +111,7 @@ Retorne apenas JSON no seguinte formato:
 `;
 
     const response = await generate({
-      model: googleAI('gemini-1.5-flash'),
+      model: gemini15Flash,
       prompt,
       config: {
         temperature: 0.3,

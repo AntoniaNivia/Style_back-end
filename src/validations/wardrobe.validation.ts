@@ -17,5 +17,24 @@ export const getWardrobeSchema = z.object({
   }),
 });
 
+export const analyzeClothingSchema = z.object({
+  body: z.object({
+    // Suporte para o novo formato
+    imageBase64: z.string().optional(),
+    imageType: z.string().optional(),
+    // Suporte para o formato antigo (compatibilidade)
+    photoDataUri: z.string().optional(),
+    // Campos opcionais
+    name: z.string().optional(),
+    description: z.string().optional(),
+  }).refine(
+    (data) => data.photoDataUri || (data.imageBase64 && data.imageType),
+    {
+      message: "É necessário fornecer 'photoDataUri' ou 'imageBase64' + 'imageType'",
+    }
+  ),
+});
+
 export type AddClothingItemInput = z.infer<typeof addClothingItemSchema>['body'];
+export type AnalyzeClothingInput = z.infer<typeof analyzeClothingSchema>['body'];
 export type GetWardrobeInput = z.infer<typeof getWardrobeSchema>['query'];

@@ -15,10 +15,25 @@ app.use(helmet());
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] // Replace with your frontend domain
-    : ['http://localhost:3000', 'http://localhost:3001'],
+    ? [
+        'https://yourdomain.com', // Substitua pelo domínio do seu frontend
+      ]
+    : [
+        'http://localhost:3000', // React/Next.js
+        'http://localhost:3001', // Vite
+        'http://localhost:5173', // Vite alternativo
+        'http://localhost:9002', // Frontend atual
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:9002',
+      ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -111,7 +126,7 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   }
 
   // Default error response
-  res.status(500).json({
+  return res.status(500).json({
     success: false,
     message: config.nodeEnv === 'production' 
       ? 'Erro interno do servidor' 
