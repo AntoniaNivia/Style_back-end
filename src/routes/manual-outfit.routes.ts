@@ -4,16 +4,7 @@ import manualOutfitController from '../controllers/manual-outfit.controller'
 
 const router = Router()
 
-// GET /api/manual-outfits/debug - Rota de debug sem autenticação
-router.get('/debug', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Manual outfit routes working',
-    timestamp: new Date().toISOString()
-  })
-})
-
-// Aplicar autenticação a todas as rotas (exceto debug)
+// Aplicar autenticação a todas as rotas
 router.use(authMiddleware)
 
 // POST /api/manual-outfits - Criar um novo look manual
