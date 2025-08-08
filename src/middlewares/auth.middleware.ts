@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { config } from '@/config';
-import { UnauthorizedError, NotFoundError } from '@/utils/AppError';
+import { config } from '../config';
+import { UnauthorizedError, NotFoundError } from '../utils/AppError';
 
 const prisma = new PrismaClient();
 

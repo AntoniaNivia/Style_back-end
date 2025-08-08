@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { runFlow } from '@genkit-ai/flow';
-import { generateOutfit } from '@/ai/flows/generate-outfit.flow';
-import { NotFoundError, ValidationError, AppError } from '@/utils/AppError';
-import { GenerateOutfitInput } from '@/validations/builder.validation';
+import { generateOutfit } from '../ai/flows/generate-outfit.flow';
+import { NotFoundError, ValidationError, AppError } from '../utils/AppError';
+import { GenerateOutfitInput } from '../validations/builder.validation';
 
 const prisma = new PrismaClient();
 

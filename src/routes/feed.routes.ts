@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { feedController } from '@/controllers/feed.controller';
-import { authMiddleware, requireUserType } from '@/middlewares/auth.middleware';
+import { feedController } from '../controllers/feed.controller';
+import { authMiddleware, requireUserType } from '../middlewares/auth.middleware';
 
 const router = Router();
 

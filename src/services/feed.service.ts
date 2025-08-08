@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { supabaseService } from './supabase.service';
-import { NotFoundError, ForbiddenError, ValidationError, AppError } from '@/utils/AppError';
-import { CreateFeedPostInput, GetFeedInput } from '@/validations/feed.validation';
+import { NotFoundError, ForbiddenError, ValidationError, AppError } from '../utils/AppError';
+import { CreateFeedPostInput, GetFeedInput } from '../validations/feed.validation';
 
 const prisma = new PrismaClient();
 

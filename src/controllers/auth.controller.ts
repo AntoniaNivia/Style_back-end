@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { authService } from '@/services/auth.service';
-import { registerSchema, loginSchema } from '@/validations/auth.validation';
-import { ValidationError } from '@/utils/AppError';
+import { authService } from '../services/auth.service';
+import { registerSchema, loginSchema } from '../validations/auth.validation';
+import { ValidationError } from '../utils/AppError';
 
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {

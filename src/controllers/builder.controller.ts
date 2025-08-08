@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { builderService } from '@/services/builder.service';
-import { generateOutfitSchema } from '@/validations/builder.validation';
-import { ValidationError } from '@/utils/AppError';
+import { builderService } from '../services/builder.service';
+import { generateOutfitSchema } from '../validations/builder.validation';
+import { ValidationError } from '../utils/AppError';
 
 export class BuilderController {
   async generateOutfit(req: Request, res: Response, next: NextFunction) {

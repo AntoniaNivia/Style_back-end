@@ -1,5 +1,5 @@
 import { app } from './app';
-import { config } from '@/config';
+import { config } from './config';
 
 // Initialize Genkit
 import './ai/genkit';

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { wardrobeService } from '@/services/wardrobe.service';
-import { addClothingItemSchema, getWardrobeSchema, analyzeClothingSchema } from '@/validations/wardrobe.validation';
-import { generateOutfitSchema } from '@/validations/builder.validation';
-import { ValidationError } from '@/utils/AppError';
+import { wardrobeService } from '../services/wardrobe.service';
+import { addClothingItemSchema, getWardrobeSchema, analyzeClothingSchema } from '../validations/wardrobe.validation';
+import { generateOutfitSchema } from '../validations/builder.validation';
+import { ValidationError } from '../utils/AppError';
 
 export class WardrobeController {
   async addClothingItem(req: Request, res: Response, next: NextFunction) {

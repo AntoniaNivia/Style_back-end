@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { config } from '@/config';
-import { ConflictError, UnauthorizedError, ValidationError } from '@/utils/AppError';
-import { RegisterInput, LoginInput } from '@/validations/auth.validation';
+import { config } from '../config';
+import { ConflictError, UnauthorizedError, ValidationError } from '../utils/AppError';
+import { RegisterInput, LoginInput } from '../validations/auth.validation';
 
 const prisma = new PrismaClient();
 

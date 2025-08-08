@@ -2,9 +2,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { apiRoutes } from '@/routes';
-import { AppError } from '@/utils/AppError';
-import { config } from '@/config';
+import { apiRoutes } from './routes';
+import { AppError } from './utils/AppError';
+import { config } from './config';
 
 // Initialize Express app
 const app = express();

@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { supabaseService } from './supabase.service';
-import { analyzeClothingFlow } from '@/ai/flows/analyze-clothing.flow';
-import { generateOutfit } from '@/ai/flows/generate-outfit.flow';
-import { NotFoundError, ValidationError } from '@/utils/AppError';
-import { AddClothingItemInput, GetWardrobeInput, AnalyzeClothingInput } from '@/validations/wardrobe.validation';
-import { GenerateOutfitInput } from '@/validations/builder.validation';
+import { analyzeClothingFlow } from '../ai/flows/analyze-clothing.flow';
+import { generateOutfit } from '../ai/flows/generate-outfit.flow';
+import { NotFoundError, ValidationError } from '../utils/AppError';
+import { AddClothingItemInput, GetWardrobeInput, AnalyzeClothingInput } from '../validations/wardrobe.validation';
+import { GenerateOutfitInput } from '../validations/builder.validation';
 import { runFlow } from '@genkit-ai/flow';
 
 const prisma = new PrismaClient();

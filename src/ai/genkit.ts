@@ -1,6 +1,6 @@
 import { configureGenkit } from '@genkit-ai/core';
 import { googleAI } from '@genkit-ai/googleai';
-import { config } from '@/config';
+import { config } from '../config';
 
 const ai: any = configureGenkit({
   plugins: [

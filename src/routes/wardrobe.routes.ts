@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { wardrobeController } from '@/controllers/wardrobe.controller';
+import { wardrobeController } from '../controllers/wardrobe.controller';
 import wardrobeSearchController from '../controllers/wardrobe-search.controller';
-import { authMiddleware } from '@/middlewares/auth.middleware';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 

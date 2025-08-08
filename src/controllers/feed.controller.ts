@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { feedService } from '@/services/feed.service';
+import { feedService } from '../services/feed.service';
 import { 
   createFeedPostSchema, 
   getFeedSchema, 
   getSavedPostsSchema, 
   postIdSchema 
-} from '@/validations/feed.validation';
-import { ValidationError } from '@/utils/AppError';
+} from '../validations/feed.validation';
+import { ValidationError } from '../utils/AppError';
 
 export class FeedController {
   async createFeedPost(req: Request, res: Response, next: NextFunction) {

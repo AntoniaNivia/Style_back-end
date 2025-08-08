@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from '@/utils/AppError';
+import { ForbiddenError } from '../utils/AppError';
 
 /**
  * Middleware para garantir que apenas usuários do tipo STORE possam acessar o endpoint
