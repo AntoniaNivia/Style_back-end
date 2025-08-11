@@ -10,6 +10,7 @@ export interface MannequinGenerationRequest {
   mannequinPreference: 'Woman' | 'Man' | 'Neutral'
   outfitName?: string
   notes?: string
+  imagesDataUri?: string[] // Array de imagens das roupas em Data URI
 }
 
 export interface MannequinGenerationResponse {
@@ -43,12 +44,18 @@ class MannequinService {
       // 2. Gerar ID único para o preview
       const previewId = `preview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      // 3. Criar prompt para IA baseado nos itens
+      // 3. Criar prompt multimodal para IA
       const itemsDescription = items.map(item => 
         `${item.type} ${item.color} (${item.occasion}, ${item.season})`
       ).join(', ')
 
-      const generationPrompt = this.buildGenerationPrompt(itemsDescription, data.mannequinPreference)
+      // Prompt multimodal: texto + imagens
+      const prompt: any[] = [
+        { text: `Gere uma imagem de corpo inteiro de um manequim ${data.mannequinPreference} em um fundo de estúdio branco, vestindo o conjunto de roupas fornecido nas imagens a seguir. Combine as peças de forma realista e estilosa. Descrição do look: ${itemsDescription}` }
+      ]
+      if (data.imagesDataUri && data.imagesDataUri.length > 0) {
+        prompt.push(...data.imagesDataUri.map(dataUri => ({ media: { url: dataUri } })))
+      }
 
       // 4. Criar registro de geração
       const generation = await prisma.mannequinGeneration.create({
@@ -56,13 +63,13 @@ class MannequinService {
           userId: data.userId,
           previewId,
           status: 'PENDING',
-          generationPrompt,
-          aiService: 'stable-diffusion' // Por enquanto, placeholder
+          generationPrompt: JSON.stringify(prompt),
+          aiService: 'googleai/gemini-2.0-flash-preview-image-generation'
         }
       })
 
-      // 5. Gerar imagem real usando IA
-      const mannequinImageUrl = await this.generateImageWithAI(generationPrompt, previewId)
+      // 5. Gerar imagem real usando IA (multimodal)
+      const mannequinImageUrl = await this.generateImageWithAI(prompt, previewId)
 
       // 6. Atualizar o registro com sucesso
       await prisma.mannequinGeneration.update({
@@ -105,13 +112,17 @@ class MannequinService {
   }
 
   // Gerar imagem real usando IA (Genkit/Google AI)
-  private async generateImageWithAI(prompt: string, previewId: string): Promise<string> {
+  private async generateImageWithAI(prompt: any[], previewId: string): Promise<string> {
     try {
-      // Chamada à IA para gerar imagem
-      const result = await ai.generateImage({ prompt });
-      // Espera-se que result.imageUrl seja a URL da imagem gerada
-      if (result && result.imageUrl) {
-        return result.imageUrl;
+      // Chamada à IA para gerar imagem multimodal
+      const result = await ai.generate({
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        prompt: prompt,
+        config: { responseModalities: ['TEXT', 'IMAGE'] },
+      });
+      // Espera-se que result.media.url seja a URL da imagem gerada
+      if (result && result.media && result.media.url) {
+        return result.media.url;
       }
       // Fallback se não vier a URL
       return `https://api.stylewise.com/mannequin/generated/${previewId}.jpg`;
