@@ -29,6 +29,7 @@ export class WardrobeService {
         imageBase64,
         imageType,
       });
+      console.log('Resultado da análise IA (addClothingItem):', analysis);
 
       // Upload image to Supabase
       const photoUrl = await supabaseService.uploadImage(buffer, 'clothing', contentType);
