@@ -16,7 +16,7 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        'https://yourdomain.com', // Substitua pelo domínio do seu frontend
+        'https://style-front-end.vercel.app', // Domínio do frontend Vercel
         'https://style-back-end.onrender.co', // Domínio do backend Render
       ]
     : [
