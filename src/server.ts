@@ -4,7 +4,7 @@ import { config } from './config';
 // Initialize Genkit
 import './ai/genkit';
 
-const PORT = config.port;
+const PORT = process.env.PORT || config.port || 3000;
 
 // Start server
 const server = app.listen(PORT, () => {
