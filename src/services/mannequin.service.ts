@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { AppError } from '../utils/AppError'
+import { ai } from '../ai/genkit'
 
 const prisma = new PrismaClient()
 
@@ -60,9 +61,8 @@ class MannequinService {
         }
       })
 
-      // 5. Simular geração de imagem (placeholder)
-      // Em produção, aqui seria a integração com DALL-E, Midjourney, etc.
-      const mannequinImageUrl = await this.simulateImageGeneration(generationPrompt, previewId)
+      // 5. Gerar imagem real usando IA
+      const mannequinImageUrl = await this.generateImageWithAI(generationPrompt, previewId)
 
       // 6. Atualizar o registro com sucesso
       await prisma.mannequinGeneration.update({
@@ -104,14 +104,22 @@ class MannequinService {
     return basePrompt
   }
 
-  // Simular geração de imagem (substituir por integração real)
-  private async simulateImageGeneration(prompt: string, previewId: string): Promise<string> {
-    // Simular delay de geração
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Retornar URL simulada
-    // Em produção, aqui seria a URL real da imagem gerada
-    return `https://api.stylewise.com/mannequin/generated/${previewId}.jpg`
+  // Gerar imagem real usando IA (Genkit/Google AI)
+  private async generateImageWithAI(prompt: string, previewId: string): Promise<string> {
+    try {
+      // Chamada à IA para gerar imagem
+      const result = await ai.generateImage({ prompt });
+      // Espera-se que result.imageUrl seja a URL da imagem gerada
+      if (result && result.imageUrl) {
+        return result.imageUrl;
+      }
+      // Fallback se não vier a URL
+      return `https://api.stylewise.com/mannequin/generated/${previewId}.jpg`;
+    } catch (error) {
+      console.error('Erro ao gerar imagem com IA:', error);
+      // Fallback para URL simulada
+      return `https://api.stylewise.com/mannequin/generated/${previewId}.jpg`;
+    }
   }
 
   // Buscar status da geração

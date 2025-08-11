@@ -17,6 +17,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
         'https://yourdomain.com', // Substitua pelo domínio do seu frontend
+        'https://style-back-end.onrender.co', // Domínio do backend Render
       ]
     : [
         'http://localhost:3000', // React/Next.js
