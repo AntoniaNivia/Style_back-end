@@ -11,6 +11,9 @@ export class WardrobeController {
         throw new ValidationError('Usuário não autenticado');
       }
 
+      // Log para inspeção do payload recebido
+      console.log('Payload recebido em /api/wardrobe:', req.body);
+
       // Validate request
       const validation = addClothingItemSchema.safeParse({ body: req.body });
       
