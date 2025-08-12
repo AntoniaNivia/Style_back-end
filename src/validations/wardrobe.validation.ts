@@ -3,6 +3,11 @@ import { z } from 'zod';
 export const addClothingItemSchema = z.object({
   body: z.object({
     photoDataUri: z.string().min(1, 'Imagem é obrigatória'),
+    type: z.string().optional(),
+    color: z.string().optional(),
+    season: z.string().optional(),
+    occasion: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
 });
 

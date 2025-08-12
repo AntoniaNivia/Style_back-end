@@ -34,16 +34,16 @@ export class WardrobeService {
       // Upload image to Supabase
       const photoUrl = await supabaseService.uploadImage(buffer, 'clothing', contentType);
 
-      // Garantir valores default para campos obrigatórios
+      // Priorizar dados do usuário, usar IA apenas como fallback
       const clothingItem = await prisma.clothingItem.create({
         data: {
           userId,
           photoUrl,
-          type: analysis.type ?? 'Indefinido',
-          color: analysis.color ?? 'Indefinido',
-          season: analysis.season ?? 'Indefinido',
-          occasion: analysis.occasion ?? 'Indefinido',
-          tags: Array.isArray(analysis.tags) ? analysis.tags : [],
+          type: data.type ?? analysis?.type ?? 'Indefinido',
+          color: data.color ?? analysis?.color ?? 'Indefinido',
+          season: data.season ?? analysis?.season ?? 'Indefinido',
+          occasion: data.occasion ?? analysis?.occasion ?? 'Indefinido',
+          tags: Array.isArray(data.tags) ? data.tags : (analysis?.tags ?? []),
         },
       });
 
